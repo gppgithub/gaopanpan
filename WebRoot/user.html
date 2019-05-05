@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>菜单管理</title>
+<link rel="stylesheet" type="text/css"
+	href="js/easyui/themes/bootstrap/easyui.css">
+<link rel="stylesheet" type="text/css" href="js/easyui/themes/icon.css">
+<script type="text/javascript" src="js/easyui/jquery.min.js"></script>
+<script type="text/javascript" src="js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript"
+	src="js/easyui/locale/easyui-lang-zh_CN.js"></script>
+</head>
+<body>
+
+	<div id="msdiv" align="center">
+
+		<div id="msdiv" class="easyui-resizable"
+			data-options="maxWidth:1600,maxHeight:900"
+			style="width:700px;height:400px;border:1px solid #ccc;">
+
+			<table id="tg" title="用户管理模块" class="easyui-datagrid"
+				style="width:800px;height:600px"
+				data-options="
+				url: 'select.action',
+				method: 'get',
+				toolbar: '#toolbar',
+				rownumbers: true,
+				singleSelect: true,
+				fitColumns: true,
+				idField: 'id',
+				pagination: 'true'
+			">
+				<thead>
+					<tr>
+						<th data-options="field:'id'" width="80">编号</th>
+						<th data-options="field:'name'" width="150">姓名</th>
+						<th data-options="field:'sex'" width="80">性别</th>
+						<th data-options="field:'birthday'" width="250">生日</th>
+						<th data-options="field:'address'" width="300">地址</th>
+					</tr>
+				</thead>
+			</table>
+
+			<div id="toolbar">
+				<a href="javascript:void(0)" class="easyui-linkbutton"
+					iconCls="icon-add" plain="true" onclick="add()">添加</a> <a
+					href="javascript:void(0)" class="easyui-linkbutton"
+					iconCls="icon-edit" plain="true" onclick="update()">编辑</a> <a
+					href="javascript:void(0)" class="easyui-linkbutton"
+					iconCls="icon-remove" plain="true" onclick="del()">删除</a>
+				<div id="tb" style="padding:3px">
+					<span>姓名:</span> <input id="name" class="easyui-textbox"
+						data-options="iconCls:'icon-search'" style="width:100px">
+					<span>性别: <select id="sex" class="easyui-combobox"
+						data-options="iconCls:'icon-search'" style="width:60px">
+							<option value="">--</option>
+							<option value="男">男</option>
+							<option value="女">女</option>
+					</select> <span>开始日期:</span><input id="birthday" class="easyui-datetimebox"
+						data-options="iconCls:'icon-search'" style="width:160px">
+						<span>结束日期:</span> <input id="birthday2"
+						class="easyui-datetimebox" data-options="iconCls:'icon-search'"
+						style="width:160px"> <a href="#" class="easyui-linkbutton"
+						data-options="iconCls:'icon-search'" onclick="doSearch()">查询</a>
+				</div>
+			</div>
+
+			<div id="dlg" class="easyui-dialog"
+				style="width:400px;height:250px;padding:10px 20px" closed="true"
+				buttons="#dlg-buttons">
+				<form id="fm" method="post">
+					<table cellspacing="10px;">
+
+						<tr>
+							<!-- id -->
+							<td colspan="2"><input name="id" class="easyui-validatebox"
+								readonly="true" hidden="true" style="width: 200px;"></td>
+						</tr>
+						<tr>
+							<td>姓名：</td>
+							<td><input name="name" class="easyui-validatebox"
+								required="true" style="width: 200px;"></td>
+						</tr>
+						<tr>
+							<td>性别：</td>
+							<td><input name="sex" class="easyui-validatebox"
+								required="true" style="width: 200px;"></td>
+						</tr>
+						<tr>
+							<td>生日：</td>
+							<td><input name="birthday" class="easyui-datetimebox"
+								required="true" style="width: 200px;"></td>
+						</tr>
+						<tr>
+							<td>地址：</td>
+							<td><input name="address" class="easyui-validatebox"
+								required="true" style="width: 200px;"></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+
+			<div id="dlg-buttons">
+				<a href="javascript:void(0)" class="easyui-linkbutton"
+					iconCls="icon-ok" onclick="save()">保存</a> <a
+					href="javascript:void(0)" class="easyui-linkbutton"
+					iconCls="icon-cancel"
+					onclick="javascript:$('#dlg').dialog('close')">关闭</a>
+			</div>
+
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		//新增
+		function add() {
+			$('#fm').form('clear');//清空表单
+			$("#dlg").dialog('open').dialog('setTitle', '新增页面');
+			url = 'add.action';
+		}
+
+		//新增和修改的保存按钮，两者共用一个表单
+		function save() {
+			$('#fm').form('submit', {
+				url : url,
+				onSubmit : function() {
+					var boo = $(this).form('validate');
+					console.log("表单验证结果：" + boo);
+					return boo;
+				},
+				success : function(result) {//添加成功control会返回true
+					console.log(result);
+					var result = eval('(' + result + ')');//easyui的form提交，服务器响应后，接到的是字符串，需要转换一下
+					if (result) {
+						$.messager.alert("系统提示", "保存成功");
+						$('#dlg').dialog('close');
+						$('#tg').datagrid('reload');
+					} else {
+						$.messager.alert("系统提示", "保存失败");
+					}
+				}
+			});
+		}
+
+		//修改
+		function update() {
+			$('#fm').form('clear');//清空表单
+			var row = $('#tg').treegrid('getSelected');//获取被选中的行
+			if (row == null) {
+				$.messager.alert("系统提示", "请选择一行");
+				return;
+			}
+			$("#dlg").dialog('open').dialog('setTitle', '修改' + row.name);
+			$('#fm').form('load', row);//从全查页面放入内容（不需要去后台单查）
+			url = 'update.action';
+		}
+		//删除
+		function del() {
+			$.messager.confirm('确认', '您确认想要删除记录吗？', function(r) {
+				if (r) {
+					var row = $('#tg').treegrid('getSelected');//获取被选中的行
+					$.post("delete.action", {
+						id : row.id
+					}, function(result) {
+						if (result) {
+							$.messager.alert("系统提示", "删除成功");
+						} else {
+							$.messager.alert("系统提示", "删除失败");
+						}
+						$('#tg').datagrid('reload');
+					}, "json");
+				}
+			});
+		}
+		//条件查询
+		function doSearch() {
+			$('#tg').datagrid({
+				url : 'select.action',
+				queryParams : {
+					'u.name' : $('#name').val(),//后台使用QueryVo接收条件，必须使用引号引起来，否则easyui会当成json解析
+					'u.sex' : $('#sex').combobox('getValue'),
+					'u.birthday' : $('#birthday').datetimebox('getValue'),
+					birthday2 : $('#birthday2').datetimebox('getValue')
+				}
+			});
+
+		}
+	</script>
+
+
+
+</body>
+</html>

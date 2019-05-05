@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="EasyUI_SSM_MySQL"
+  id="myeclipse.1493945169080"
+  context-root="/EasyUI_SSM_MySQL"
+  j2ee-spec="6.0"
+  archive="EasyUI_SSM_MySQL.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+
